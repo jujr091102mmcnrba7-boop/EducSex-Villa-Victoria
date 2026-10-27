@@ -25,17 +25,6 @@ otros:["Inyección y otros métodos","Las inyecciones y otros métodos hormonale
 };
 $$("[data-method]").forEach(b=>b.addEventListener("click",()=>{const d=methodDetails[b.dataset.method];$("#detailTitle").textContent=d[0];$("#detailText").textContent=d[1];detailDialog.showModal()}));
 $$(".myth-card").forEach(b=>b.addEventListener("click",()=>{b.classList.toggle("open");b.setAttribute("aria-expanded",String(b.classList.contains("open")))}));
-// Los nombres, roles y descripciones son fijos. Solo se permite cambiar la foto en esta sesión.
-$$(".member-photo-input").forEach(input=>input.addEventListener("change",()=>{
-  const file=input.files && input.files[0];
-  if(!file) return;
-  if(!file.type.startsWith("image/")){toast("Selecciona un archivo de imagen.");input.value="";return;}
-  if(file.size>5*1024*1024){toast("La imagen debe pesar menos de 5 MB.");input.value="";return;}
-  const card=input.closest(".team-card"), img=$(".team-photo img",card);
-  const reader=new FileReader();
-  reader.onload=()=>{img.src=reader.result;img.alt="Fotografía seleccionada para el integrante";toast("Foto actualizada en esta sesión.")};
-  reader.readAsDataURL(file);
-}));
 const faq={
 embarazo:[
 ["¿Qué es el embarazo adolescente?","Es un embarazo que ocurre durante la adolescencia. Cada situación es distinta y merece atención médica, información confiable y apoyo sin juicios."],
