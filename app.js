@@ -4,16 +4,7 @@ const detailDialog = $("#detailDialog");
 function toast(message){const old=$(".toast");if(old)old.remove();const t=document.createElement("div");t.className="toast";t.textContent=message;document.body.append(t);setTimeout(()=>t.remove(),3000)}
 // La plataforma solo se muestra después de completar el formulario de inicio.
 const registeredName = (sessionStorage.getItem("educsex_alias") || "").trim();
-const registeredGroup = (sessionStorage.getItem("educsex_group") || "").trim();
 if(!registeredName){window.location.replace("index.html");}
-else {
-  const welcome = $("#userWelcome");
-  if(welcome) welcome.textContent = `¡Hola, ${registeredName}!${registeredGroup ? ` · Grupo ${registeredGroup}` : ""}`;
-  const topbarRight = $(".topbar-right");
-  if(topbarRight) topbarRight.textContent = `Sesión de ${registeredName} · Información · Respeto · Confidencialidad`;
-  const heroTitle = $(".hero h1");
-  if(heroTitle) heroTitle.innerHTML = `¡Hola, ${registeredName.replace(/[&<>\"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;", "'":"&#39;"}[c]))}!<br><span>Este espacio es para ti.</span>`;
-}
 const menuToggle=$("#menuToggle"), mainNav=$("#mainNav");
 menuToggle.addEventListener("click",()=>{const open=mainNav.classList.toggle("open");menuToggle.setAttribute("aria-expanded",String(open));menuToggle.textContent=open?"×":"☰"});
 $$("#mainNav a").forEach(a=>a.addEventListener("click",()=>{mainNav.classList.remove("open");menuToggle.setAttribute("aria-expanded","false");menuToggle.textContent="☰"}));
@@ -24,7 +15,11 @@ larga:["Implante e DIU","El implante y los dispositivos intrauterinos son métod
 otros:["Inyección y otros métodos","Las inyecciones y otros métodos hormonales tienen pautas distintas de aplicación. La elección debe considerar salud, preferencias y posibles efectos secundarios. El personal de salud puede explicar opciones, uso correcto y qué hacer si se retrasa una dosis."]
 };
 $$("[data-method]").forEach(b=>b.addEventListener("click",()=>{const d=methodDetails[b.dataset.method];$("#detailTitle").textContent=d[0];$("#detailText").textContent=d[1];detailDialog.showModal()}));
-$$(".myth-card").forEach(b=>b.addEventListener("click",()=>{b.classList.toggle("open");b.setAttribute("aria-expanded",String(b.classList.contains("open")))}));
+$$(".myth-card").forEach(b=>b.addEventListener("click",()=>{
+  const shouldOpen=!b.classList.contains("open");
+  $$(".myth-card").forEach(card=>{card.classList.remove("open");card.setAttribute("aria-expanded","false")});
+  if(shouldOpen){b.classList.add("open");b.setAttribute("aria-expanded","true")}
+}));
 const faq={
 embarazo:[
 ["¿Qué es el embarazo adolescente?","Es un embarazo que ocurre durante la adolescencia. Cada situación es distinta y merece atención médica, información confiable y apoyo sin juicios."],
@@ -111,7 +106,12 @@ const quiz=[
 {q:"¿Qué debe hacer una persona si cree que está embarazada?",opts:["Guiarse solo por síntomas","Ignorar la duda","Realizar una prueba y buscar orientación de salud"],correct:2,why:"Una prueba y la orientación de personal de salud ayudan a aclarar la situación."},
 {q:"¿Cómo debe ser el consentimiento?",opts:["Libre y reversible","Obligatorio si hay pareja","Se asume sin preguntar"],correct:0,why:"El consentimiento debe ser libre, claro y puede retirarse en cualquier momento."},
 {q:"¿Las pastillas anticonceptivas protegen contra ITS?",opts:["Sí, todas","No","Solo si se toman por la noche"],correct:1,why:"Las pastillas ayudan a prevenir el embarazo, pero no protegen contra ITS."},
-{q:"¿Qué es lo más adecuado para elegir un método anticonceptivo?",opts:["Elegir por presión de otras personas","Consultar información y orientación profesional","Usar cualquier método sin leer instrucciones"],correct:1,why:"La orientación profesional ayuda a elegir según necesidades, salud y preferencias."}
+{q:"¿Qué es lo más adecuado para elegir un método anticonceptivo?",opts:["Elegir por presión de otras personas","Consultar información y orientación profesional","Usar cualquier método sin leer instrucciones"],correct:1,why:"La orientación profesional ayuda a elegir según necesidades, salud y preferencias."},
+{q:"¿Qué significa que el consentimiento sea reversible?",opts:["Puede retirarse en cualquier momento","Solo puede darse una vez","Depende de la edad de quien pregunta"],correct:0,why:"Una persona puede retirar su consentimiento en cualquier momento, aunque haya aceptado antes."},
+{q:"¿Cuál opción ayuda a prevenir embarazos e infecciones de transmisión sexual?",opts:["Condón usado correctamente","Solo la abstinencia temporal","Anticonceptivos hormonales"],correct:0,why:"El condón correctamente colocado reduce el riesgo de embarazo y muchas ITS."},
+{q:"¿Quién debe decidir el tipo de atención que recibe una persona?",opts:["Sus amistades","La propia persona con información adecuada","Cualquier adulto sin consultar"],correct:1,why:"Las decisiones sobre salud deben respetar la autonomía y la confidencialidad de la persona."},
+{q:"¿Qué hacer ante una sospecha de violencia o presión sexual?",opts:["Mantenerlo en secreto","Culpar a la persona afectada","Buscar apoyo seguro de una persona adulta o servicio confiable"],correct:2,why:"La violencia nunca es responsabilidad de quien la vive; pedir ayuda segura es el primer paso."},
+{q:"¿Qué recursos permiten confirmar si existe embarazo?",opts:["Solo una aplicación","Una prueba de embarazo y orientación médica","Esperar sin buscar información"],correct:1,why:"Una prueba y atención profesional permiten confirmar y orientar sobre las opciones disponibles."}
 ];let quizIndex=0,score=0,answered=false;
 function renderQuiz(){const item=quiz[quizIndex];$("#quizStep").textContent=`PREGUNTA ${quizIndex+1} DE ${quiz.length}`;$("#quizScore").textContent=`Puntaje: ${score}`;$("#progressFill").style.width=`${(quizIndex+1)/quiz.length*100}%`;$("#quizQuestion").textContent=item.q;$("#quizFeedback").textContent="";$("#nextQuiz").disabled=true;$("#nextQuiz").textContent=quizIndex===quiz.length-1?"Ver resultado →":"Siguiente pregunta →";$("#quizOptions").innerHTML="";answered=false;item.opts.forEach((opt,i)=>{const b=document.createElement("button");b.className="quiz-option";b.textContent=opt;b.addEventListener("click",()=>{if(answered)return;answered=true;const correct=i===item.correct;if(correct)score++;$$(".quiz-option").forEach((x,j)=>{x.disabled=true;if(j===item.correct)x.classList.add("correct");else if(j===i)x.classList.add("incorrect")});$("#quizScore").textContent=`Puntaje: ${score}`;$("#quizFeedback").textContent=(correct?"¡Correcto! ":"Puedes repasarlo. ")+item.why;$("#nextQuiz").disabled=false});$("#quizOptions").append(b)})}
-$("#nextQuiz").addEventListener("click",()=>{if(!answered)return;if(quizIndex<quiz.length-1){quizIndex++;renderQuiz()}else{$("#quizQuestion").textContent=`Resultado: ${score} de ${quiz.length}`;$("#quizOptions").innerHTML="";$("#quizFeedback").textContent=score>=4?"¡Buen trabajo! Mantén el hábito de consultar fuentes confiables.":"Repasa las secciones de métodos, mitos y chatbot para reforzar lo aprendido." ;$("#nextQuiz").disabled=false;$("#nextQuiz").textContent="Volver a intentarlo ↻";$("#nextQuiz").onclick=()=>{quizIndex=0;score=0;$("#nextQuiz").onclick=null;renderQuiz()}}});renderQuiz();
+$("#nextQuiz").addEventListener("click",()=>{if(!answered)return;if(quizIndex<quiz.length-1){quizIndex++;renderQuiz()}else{$("#quizQuestion").textContent=`Resultado: ${score} de ${quiz.length}`;$("#quizOptions").innerHTML="";$("#quizFeedback").textContent=score>=7?"¡Buen trabajo! Mantén el hábito de consultar fuentes confiables.":"Repasa las secciones de métodos, mitos y chatbot para reforzar lo aprendido." ;$("#nextQuiz").disabled=false;$("#nextQuiz").textContent="Volver a intentarlo ↻";$("#nextQuiz").onclick=()=>{quizIndex=0;score=0;$("#nextQuiz").onclick=null;renderQuiz()}}});renderQuiz();
